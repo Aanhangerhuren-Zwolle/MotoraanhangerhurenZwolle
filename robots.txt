@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://motortrailerzwolle.nl/sitemap.xml
+
+# Blokkeer geen enkele pagina - alles is openbaar
