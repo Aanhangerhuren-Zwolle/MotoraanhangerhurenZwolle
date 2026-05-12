@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MotorTrailer Zwolle &#8212; Huurovereenkomst</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#1a5c9a;--accent-dark:#0d3a6b;--accent-light:#e8f0fb;
+  --green:#25D366;--red:#c0392b;--orange:#e07b00;--gold:#f39c12;
+  --text:#1a1a1a;--muted:#555;--border:#ddd;--light:#f4f4f4;
+  --radius:8px;--shadow:0 2px 10px rgba(0,0,0,.08)
+}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--light);color:var(--text);line-height:1.6;padding-bottom:60px}
+
+.header{background:var(--accent-dark);color:#fff;padding:18px 24px;text-align:center}
+.header h1{font-size:20px;margin-bottom:3px}
+.header p{font-size:12px;opacity:.8}
+
+.fase-indicator{background:var(--accent);padding:8px 24px;display:flex;justify-content:center;gap:0;max-width:720px;margin:0 auto}
+.fase-tab{flex:1;text-align:center;padding:8px 6px;font-size:12px;font-weight:bold;color:rgba(255,255,255,.5);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s}
+.fase-tab.active{color:#fff;border-bottom-color:#FFD700}
+.fase-tab.done{color:rgba(255,255,255,.8);border-bottom-color:var(--green)}
+
+.steps-bar{background:rgba(255,255,255,.1);padding:8px 24px;display:flex;justify-content:center;gap:6px;max-width:720px;margin:0 auto;flex-wrap:wrap}
+.sdot{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:50px;font-size:11px;font-weight:bold;color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s}
+.sdot.active{background:rgba(255,255,255,.2);color:#fff}
+.sdot.done{color:var(--green)}
+.sdot-num{width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px}
+
+.wrap{max-width:720px;margin:18px auto;padding:0 14px}
+.section{background:#fff;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+.sh{background:var(--accent-light);padding:11px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.sh h2{font-size:14px;color:var(--accent);font-weight:bold}
+.sb{padding:16px}
+
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:3px}
+.req{color:var(--red)}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;transition:border-color .2s;background:#fff}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--accent)}
+.fg input.err{border-color:var(--red)}
+.fg .hint{font-size:10px;color:var(--muted);margin-top:2px}
+.fg textarea{resize:vertical;min-height:60px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:480px){.r2,.r3{grid-template-columns:1fr}}
+
+/* PRICE CALC */
+.price-box{background:linear-gradient(135deg,var(--accent-dark),var(--accent));border-radius:var(--radius);padding:16px;color:#fff;margin-bottom:12px}
+.price-box h3{font-size:13px;opacity:.8;margin-bottom:10px}
+.price-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.15)}
+.price-row:last-child{border-bottom:none;font-weight:bold;font-size:15px;padding-top:8px;margin-top:4px}
+.price-row.total{color:#FFD700}
+
+/* STAAT BUTTONS */
+.staat-grid{border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.staat-row{display:grid;grid-template-columns:120px 1fr;align-items:center;border-bottom:.5px solid var(--border)}
+.staat-row:last-child{border-bottom:none}
+.staat-lbl{padding:8px 12px;font-size:12px;color:var(--text);background:#fafafa}
+.staat-btns{display:flex;gap:0;border-left:.5px solid var(--border)}
+.sbtn{flex:1;padding:8px 4px;border:none;border-right:.5px solid var(--border);font-size:11px;font-weight:bold;cursor:pointer;background:#fff;font-family:inherit;transition:all .15s;text-align:center}
+.sbtn:last-child{border-right:none}
+.sbtn.g.sel{background:#27ae60;color:#fff}
+.sbtn.m.sel{background:var(--orange);color:#fff}
+.sbtn.s.sel{background:var(--red);color:#fff}
+.sbtn:hover{filter:brightness(.95)}
+
+/* CANVAS TRAILER */
+.canvas-wrap{border:1.5px solid var(--border);border-radius:6px;overflow:hidden;background:#f8f8f8;position:relative}
+.canvas-wrap canvas{display:block;width:100%;cursor:crosshair}
+.canvas-toolbar{display:flex;gap:6px;padding:6px;background:#f0f0f0;border-top:1px solid var(--border)}
+.ctbtn{padding:5px 12px;border:1px solid var(--border);border-radius:5px;font-size:11px;cursor:pointer;background:#fff;font-family:inherit}
+.ctbtn:hover{border-color:var(--accent);color:var(--accent)}
+.ctbtn.red:hover{border-color:var(--red);color:var(--red)}
+.schade-list{border:1px solid var(--border);border-radius:6px;padding:10px;background:#fafafa;min-height:60px}
+.schade-list h4{font-size:10px;font-weight:bold;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.si{display:flex;gap:6px;margin-bottom:5px;align-items:center}
+.si-num{font-size:10px;font-weight:bold;color:var(--red);min-width:14px}
+.si input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit}
+.si button{padding:4px 7px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff;color:var(--red);font-size:11px}
+.add-si{color:var(--accent);cursor:pointer;font-size:12px;font-weight:bold;background:none;border:none;font-family:inherit;padding:2px 0}
+
+/* SIGNATURE */
+.sig-wrap{border:1.5px solid var(--border);border-radius:6px;overflow:hidden;background:#fff}
+.sig-wrap canvas{display:block;width:100%;cursor:crosshair;touch-action:none}
+.sig-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f0f0f0;border-top:1px solid var(--border)}
+.sig-bar span{font-size:10px;color:var(--muted)}
+.sig-clear{font-size:10px;padding:3px 10px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff;font-family:inherit}
+.sig-clear:hover{border-color:var(--red);color:var(--red)}
+.sig-label{font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:4px}
+.sig-name{font-size:12px;color:var(--text);margin-top:4px}
+
+/* AKKOORD */
+.akk-box{background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:12px;margin-bottom:10px}
+.akk-box p{font-size:12px;color:#856404;margin-bottom:8px;line-height:1.5}
+.ck-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}
+.ck-row input{width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:var(--accent)}
+.ck-row label{font-size:12px;cursor:pointer;line-height:1.4}
+
+/* VOORWAARDEN */
+.vw-box{background:#f9f9f9;border:1px solid var(--border);border-radius:6px;padding:14px;max-height:260px;overflow-y:auto;font-size:11.5px;color:var(--muted);line-height:1.7;margin-bottom:10px}
+.vw-box h3{font-size:12px;font-weight:bold;color:var(--text);margin:10px 0 3px}
+.vw-box h3:first-child{margin-top:0}
+.vw-box p{margin-bottom:5px}
+.vw-box ul{padding-left:14px;margin-bottom:5px}
+.vw-box li{margin-bottom:2px}
+.vw-scroll{text-align:center;font-size:10px;color:var(--muted);margin-bottom:6px}
+
+/* SUMMARY */
+.sum-box{background:var(--accent-light);border:1px solid var(--accent);border-radius:6px;padding:12px;margin-bottom:12px}
+.sum-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:.5px solid rgba(26,92,154,.12)}
+.sum-row:last-child{border-bottom:none;font-weight:bold}
+.sum-row span:first-child{color:var(--muted)}
+
+/* FASE BADGE */
+.fase-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:bold;margin-bottom:12px}
+.f1-badge{background:#e8f0fb;color:var(--accent)}
+.f2-badge{background:#e8f7f0;color:#1a7a4a}
+
+/* BUTTONS */
+.btn-row{display:flex;justify-content:space-between;margin-top:14px}
+.btn-back{padding:9px 20px;border:2px solid var(--border);border-radius:50px;font-size:13px;font-weight:bold;cursor:pointer;background:#fff;font-family:inherit}
+.btn-back:hover{border-color:var(--accent)}
+.btn-next{padding:9px 24px;border:none;border-radius:50px;font-size:13px;font-weight:bold;cursor:pointer;background:var(--accent);color:#fff;font-family:inherit}
+.btn-next:hover{background:var(--accent-dark)}
+.btn-submit{display:inline-flex;align-items:center;gap:7px;padding:13px 32px;border:none;border-radius:50px;font-size:15px;font-weight:bold;cursor:pointer;font-family:inherit;transition:background .2s,transform .1s}
+.btn-submit.f1{background:var(--accent);color:#fff}
+.btn-submit.f1:hover{background:var(--accent-dark);transform:scale(1.02)}
+.btn-submit.f2{background:var(--green);color:#fff}
+.btn-submit.f2:hover{background:#1ebe5a;transform:scale(1.02)}
+.btn-submit:disabled{background:#aaa;cursor:not-allowed;transform:none}
+
+.submit-wrap{background:#fff;border-radius:var(--radius);border:2px solid var(--accent);padding:18px;text-align:center;box-shadow:var(--shadow)}
+.submit-wrap.f2{border-color:var(--green)}
+.submit-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+.success{display:none;background:#fff;border-radius:var(--radius);border:2px solid var(--green);padding:28px;text-align:center;margin-top:14px}
+.success h2{color:#27ae60;font-size:18px;margin-bottom:6px}
+.success p{font-size:13px;color:var(--muted)}
+
+.page{display:none}
+.page.active{display:block}
+.acc-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+.acc-item{display:flex;align-items:center;gap:6px;font-size:12px}
+.acc-item input{accent-color:var(--accent);width:14px;height:14px}
+
+.url-hint{background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 12px;font-size:12px;color:#856404;margin-bottom:12px;display:none}
+.url-hint strong{display:block;margin-bottom:4px}
+.url-hint code{font-size:11px;word-break:break-all;background:rgba(0,0,0,.07);padding:2px 5px;border-radius:3px}
+</style>
+<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
+</head>
+<body>
+
+<div class="header">
+  <h1>&#127949;&#65039; MotorTrailer Zwolle &#8212; Huurovereenkomst</h1>
+  <p>Luttekestraat 52A, 8011LS Zwolle &nbsp;|&nbsp; 06-83 31 82 86</p>
+</div>
+
+<div style="background:var(--accent);max-width:720px;margin:0 auto">
+  <div class="fase-indicator">
+    <div class="fase-tab active" id="fase-tab-1" onclick="setFase(1)">&#128221; Fase 1 &#8212; Reservering (klant)</div>
+    <div class="fase-tab" id="fase-tab-2" onclick="setFase(2)">&#128269; Fase 2 &#8212; Ophalen &amp; inspectie</div>
+  </div>
+  <div class="steps-bar" id="steps-bar"></div>
+</div>
+
+<div class="wrap" id="main-wrap">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- FASE 1                                     -->
+<!-- ══════════════════════════════════════════ -->
+
+<!-- F1 STAP 1: HUURDER -->
+<div class="page active" id="p-1-1">
+  <div class="url-hint" id="prefill-hint">
+    <strong>&#9989; Gegevens vooringevuld vanuit website</strong>
+    <span>Controleer de gegevens en vul aan waar nodig.</span>
+  </div>
+  <div class="fase-badge f1-badge">&#128221; Fase 1 / Stap 1 van 4 &#8212; Gegevens huurder</div>
+  <div class="section">
+    <div class="sh"><span>&#128100;</span><h2>Persoonlijke gegevens huurder</h2></div>
+    <div class="sb">
+      <div class="r2">
+        <div class="fg"><label>Voornaam <span class="req">*</span></label><input type="text" id="voornaam" placeholder="Voornaam"></div>
+        <div class="fg"><label>Achternaam <span class="req">*</span></label><input type="text" id="achternaam" placeholder="Achternaam"></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>Geboortedatum <span class="req">*</span></label><input type="date" id="geboortedatum"></div>
+        <div class="fg"><label>Telefoonnummer <span class="req">*</span></label><input type="tel" id="telefoon" placeholder="06-xx xx xx xx"></div>
+      </div>
+      <div class="fg"><label>E-mailadres <span class="req">*</span></label><input type="email" id="email" placeholder="naam@email.nl"><div class="hint">Huurovereenkomst wordt naar dit adres gestuurd</div></div>
+      <div class="fg"><label>Straatnaam + huisnummer <span class="req">*</span></label><input type="text" id="straat" placeholder="Voorbeeldstraat 12"></div>
+      <div class="r2">
+        <div class="fg"><label>Postcode <span class="req">*</span></label><input type="text" id="postcode" placeholder="1234 AB"></div>
+        <div class="fg"><label>Woonplaats <span class="req">*</span></label><input type="text" id="woonplaats" placeholder="Woonplaats"></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>Rijbewijsnummer <span class="req">*</span></label><input type="text" id="rijbewijs" placeholder="Rijbewijsnummer"></div>
+        <div class="fg"><label>Type legitimatie <span class="req">*</span></label>
+          <select id="legitimatie"><option value="">Kies...</option><option>Rijbewijs</option><option>Paspoort</option><option>Identiteitskaart</option></select>
+        </div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>Merk &amp; model trekkend voertuig <span class="req">*</span></label><input type="text" id="voertuig" placeholder="bijv. VW Golf"></div>
+        <div class="fg"><label>Kenteken trekkend voertuig <span class="req">*</span></label><input type="text" id="kenteken" placeholder="XX-000-X" style="text-transform:uppercase"></div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row"><div></div><button class="btn-next" onclick="next(1,1)">Volgende &#8594;</button></div>
+</div>
+
+<!-- F1 STAP 2: HUURPERIODE + PRIJS -->
+<div class="page" id="p-1-2">
+  <div class="fase-badge f1-badge">&#128221; Fase 1 / Stap 2 van 4 &#8212; Huurperiode &amp; tarieven</div>
+  <div class="section">
+    <div class="sh"><span>&#128197;</span><h2>Trailer &amp; huurperiode</h2></div>
+    <div class="sb">
+      <div class="fg"><label>Welke trailer? <span class="req">*</span></label>
+        <select id="trailer-keuze" onchange="calcPrijs()">
+          <option value="">Selecteer trailer...</option>
+          <option value="1">Trailer 1 &#8212; Ongeremd 220x130cm | B-rijbewijs</option>
+          <option value="2">Trailer 2 &#8212; Geremd 300x165cm | B-rijbewijs</option>
+        </select>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>Datum ophalen <span class="req">*</span></label><input type="date" id="datum-van" onchange="calcPrijs()"></div>
+        <div class="fg"><label>Tijdstip ophalen <span class="req">*</span></label><input type="time" id="tijd-van" value="14:00" onchange="calcPrijs()"></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>Datum retour <span class="req">*</span></label><input type="date" id="datum-tot" onchange="calcPrijs()"></div>
+        <div class="fg"><label>Tijdstip retour <span class="req">*</span></label><input type="time" id="tijd-tot" value="16:00" onchange="calcPrijs()"></div>
+      </div>
+      <div class="fg"><label>Bestemming (verplicht bij gebruik buiten NL)</label><input type="text" id="bestemming" placeholder="Volledig adres of stad bestemming"></div>
+      <div id="prijs-box" style="display:none" class="price-box">
+        <h3>&#128176; Kostenoverzicht</h3>
+        <div class="price-row"><span>Huurperiode</span><span id="pc-uren">&#8212;</span></div>
+        <div class="price-row"><span>Tarief</span><span id="pc-tarief">&#8212;</span></div>
+        <div class="price-row"><span>Ophalen</span><span id="pc-van">&#8212;</span></div>
+        <div class="price-row"><span>Retour</span><span id="pc-tot">&#8212;</span></div>
+        <div class="price-row total"><span>Huursom (excl. borg)</span><span id="pc-prijs">&#8212;</span></div>
+        <div class="price-row"><span>Borg (contant bij ophalen)</span><span id="pc-borg">&#8212;</span></div>
+        <div class="price-row"><span>Te laat tarief</span><span>&#8364;15/uur + &#8364;25 admin</span></div>
+      </div>
+      <div class="fg"><label>Opmerkingen / bijzonderheden</label><textarea id="opmerkingen" placeholder="Motortype, bijzonderheden..."></textarea></div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn-back" onclick="goP('1-1')">&#8592; Terug</button><button class="btn-next" onclick="next(1,2)">Volgende &#8594;</button></div>
+</div>
+
+<!-- F1 STAP 3: VOORWAARDEN + AKKOORD -->
+<div class="page" id="p-1-3">
+  <div class="fase-badge f1-badge">&#128221; Fase 1 / Stap 3 van 4 &#8212; Algemene voorwaarden</div>
+  <div class="section">
+    <div class="sh"><span>&#128220;</span><h2>Algemene voorwaarden verhuur motortrailer</h2></div>
+    <div class="sb">
+      <div class="vw-scroll">&#9660; Scroll om de volledige voorwaarden te lezen &#9660;</div>
+      <div class="vw-box">
+        <h3>1. Toepasselijkheid</h3>
+        <p>Deze voorwaarden zijn van toepassing op iedere huurovereenkomst tussen verhuurder en huurder met betrekking tot een motortrailer. De huurder en verhuurder zijn in het onderstaande document vastgesteld en zullen verder in dit document als verhuurder en huurder genoemd worden.</p>
+        <h3>2. Object van huur</h3>
+        <p>De verhuur betreft een motortrailer met een dagwaarde van circa &#8364;1.400,-. De trailer wordt in goede staat ter beschikking gesteld. Zonder gebreken en werkende verlichting.</p>
+        <h3>3. Huurperiode</h3>
+        <p>De huurperiode wordt vooraf overeengekomen in de huurovereenkomst. Bij overschrijding kunnen er extra kosten in rekening gebracht worden van &#8364;15 per uur dat de trailer te laat ingeleverd wordt + &#8364;25 administratiekosten.</p>
+        <p><em>Aanvulling (annulering): Kosteloos annuleren is mogelijk tot 24 uur voor de afgesproken ophaaltijd. Bij annulering korter dan 24 uur: 50% van de huursom. Op de dag zelf: 100% van de huursom.</em></p>
+        <h3>4. Tarieven en borg</h3>
+        <p>Huurprijzen 2026 (Trailer 1 &#8212; ongeremd):<br>
+        &#8364;35,- per dag (12 uur) &#183; &#8364;70,- per weekend (60 uur) &#183; &#8364;139,- per week (per 24 uur daarboven)</p>
+        <p>Huurprijzen 2026 (Trailer 2 &#8212; geremd):<br>
+        &#8364;45,- per dag (12 uur) &#183; &#8364;89,- per weekend (60 uur) &#183; &#8364;159,- per week (per 24 uur daarboven)</p>
+        <p>In de huurovereenkomst wordt opgenomen op welk tijdstip de trailer opgehaald wordt en retour komt. Hierop wordt ook vermeld wat de kosten hiervoor zijn. Deze dienen vooraf betaald te worden.</p>
+        <p>Borg: &#8364;190,- Trailer 1 / &#8364;200,- Trailer 2 (contant te voldoen bij aanvang huur).</p>
+        <h3>5. Gebruik</h3>
+        <p>De trailer mag uitsluitend gebruikt worden voor het vervoer van motoren. Overbelasting en onjuist gebruik zijn niet toegestaan. De huurder is verantwoordelijk voor correcte bevestiging van de lading en het bijbehorende gewicht.</p>
+        <p>De trailer heeft een maximaal totaal gewicht van 750 kg inclusief het eigen gewicht van de aanhanger. De huurder dient zelf rekening te houden met het beladen van de aanhanger met dit gewicht en mag deze niet overschrijden.</p>
+        <ul>
+          <li>Alleen voor vervoer van motoren</li>
+          <li>Maximaal laadvermogen niet overschrijden</li>
+          <li>Huurder beschikt over geldig rijbewijs en geschikt trekkend voertuig</li>
+          <li>Correcte bevestiging en zekering van lading verplicht</li>
+          <li>Geen onderverhuur of gebruik door derden</li>
+          <li>Gebruik buiten Nederland alleen met schriftelijke toestemming</li>
+        </ul>
+        <h3>6. Aansprakelijkheid</h3>
+        <p>De huurder is aansprakelijk voor alle schade, verlies en diefstal die gedurende de huurperiode ontstaan en aantoonbaar aan het gebruik door de huurder zijn toe te schrijven. <em>(Aanvulling: bij overmacht als bedoeld in Boek 6 BW kan aansprakelijkheid worden beperkt.)</em> De maximale aansprakelijkheid bedraagt de dagwaarde van &#8364;1.400,-. Bij diefstal of verlies van de trailer zal de dagwaarde worden doorbelast aan de huurder.</p>
+        <p>Het transport is volledig op eigen risico, de verhuurder accepteert onder geen enkele voorwaarde verantwoordelijkheid voor schade die ontstaan aan de aanhanger of motorfietsen die vervoerd zijn tijdens de huurperiode die bovenstaand overeengekomen is.</p>
+        <h3>7. Schade en defecten</h3>
+        <p>Alle schade die ontstaat tijdens de verhuurperiode is voor rekening van de huurder, ongeacht oorzaak. Mits mogelijk wordt dit van de borg ingehouden, het kan voorkomen dat er een aanvullende rekening komt met een maximum van de dagwaarde van de trailer. Dit gebeurt enkel met aangetoonde facturen voor materiaal of diensten nodig om de trailer weer in dezelfde staat te krijgen als voor de huurperiode.</p>
+        <p>Dit omvat onder andere: lekke banden, schade aan verlichting, schade door verkeerd gebruik, overige schade. Schade dient direct schriftelijk gemeld te worden.</p>
+        <h3>8. Verzekering</h3>
+        <p>De trailer is niet verzekerd. Alle risico&#39;s liggen volledig bij de huurder. Controleer voorafgaand de verzekeringsvoorwaarden van het trekkende voertuig en sluit een aanvullende verzekering af mits nodig.</p>
+        <h3>9. Onderhoud en controle</h3>
+        <p>De huurder dient de trailer voor gebruik te controleren en tijdens de huurperiode veilig &amp; verantwoordelijk te gebruiken.</p>
+        <h3>10. Boetes</h3>
+        <p>Alle verkeersboetes en kosten die voorkomen binnen het huurtermijn zijn voor rekening van de huurder. Administratiekosten bedragen &#8364;25,- per boete.</p>
+        <h3>11. Inlevering</h3>
+        <p>De trailer dient schoon en in dezelfde staat te worden ingeleverd. Eventuele kosten worden verrekend met de borg of een aanvullende factuur of betaling. Kosten voor het schoonmaken van de trailer bedragen &#8364;45,- mits niet in dezelfde staat geretourneerd.</p>
+        <h3>12. Overige bepalingen</h3>
+        <p>Onderverhuur is niet toegestaan. Gebruik buiten Nederland alleen met toestemming. Op deze overeenkomst is Nederlands recht van toepassing.</p>
+        <ul>
+          <li>Geschillen worden voorgelegd aan de bevoegde rechter in het arrondissement van verhuurder</li>
+          <li>Deze huurvoorwaarden maken integraal onderdeel uit van de huurovereenkomst en zijn bij ondertekening aan huurder ter hand gesteld</li>
+        </ul>
+        <h3>13. Privacy &#8212; AVG (aanvulling, wettelijk verplicht)</h3>
+        <p>Verhuurder verwerkt persoonsgegevens (naam, adres, geboortedatum, rijbewijsnummer, kenteken) uitsluitend voor de uitvoering van de huurovereenkomst. Gegevens worden maximaal 2 jaar bewaard en niet aan derden verstrekt, conform de Algemene Verordening Gegevensbescherming (AVG/GDPR).</p>
+        <h3>14. Herroepingsrecht (aanvulling, wettelijk verplicht)</h3>
+        <p>Bij huurovereenkomsten met een vaste huurperiode vervalt het wettelijk herroepingsrecht zodra de huurperiode aanvangt (art. 6:230p sub l BW). Zie artikel 3 voor het annuleringsbeleid.</p>
+      </div>
+      <div class="akk-box">
+        <p><strong>Lees de voorwaarden zorgvuldig door. Door aanvinken verklaart u kennis te hebben genomen van en akkoord te gaan met alle bepalingen.</strong></p>
+        <div class="ck-row"><input type="checkbox" id="a1"><label for="a1">Ik heb de algemene voorwaarden volledig gelezen en ga hiermee akkoord.</label></div>
+        <div class="ck-row"><input type="checkbox" id="a2"><label for="a2">Ik ga akkoord met de overeengekomen huurperiode, het trailertype en de bijbehorende huursom en borg.</label></div>
+        <div class="ck-row"><input type="checkbox" id="a3"><label for="a3">Ik beschik over een geldig rijbewijs B en een geschikt trekkend voertuig met trekhaak.</label></div>
+        <div class="ck-row"><input type="checkbox" id="a4"><label for="a4">Ik ben verantwoordelijk voor correcte lading en overschrijd het maximale gewicht van 750 kg niet.</label></div>
+        <div class="ck-row"><input type="checkbox" id="a5"><label for="a5">Ik begrijp dat de trailer niet verzekerd is en controleer of mijn WA de aanhanger dekt.</label></div>
+        <div class="ck-row"><input type="checkbox" id="a6"><label for="a6">Ik ga akkoord met de verwerking van mijn persoonsgegevens conform artikel 13 (AVG).</label></div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn-back" onclick="goP('1-2')">&#8592; Terug</button><button class="btn-next" onclick="next(1,3)">Naar handtekening &#8594;</button></div>
+</div>
+
+<!-- F1 STAP 4: HANDTEKENING HUURDER -->
+<div class="page" id="p-1-4">
+  <div class="fase-badge f1-badge">&#128221; Fase 1 / Stap 4 van 4 &#8212; Handtekening &amp; verzenden</div>
+  <div class="section">
+    <div class="sh"><span>&#9997;&#65039;</span><h2>Handtekening huurder</h2></div>
+    <div class="sb">
+      <div id="sum-f1" class="sum-box" style="margin-bottom:14px"></div>
+      <div class="sig-label">Handtekening huurder <span class="req">*</span></div>
+      <div class="fg"><div class="hint" style="margin-bottom:6px">Teken hieronder met uw vinger of muis</div>
+        <div class="sig-wrap"><canvas id="sig-huurder" width="640" height="160"></canvas>
+        <div class="sig-bar"><span id="sig-naam-h">Naam huurder</span><button class="sig-clear" onclick="clearSig('huurder')">Wissen</button></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
+          <div class="fg"><label>Datum</label><input type="date" id="sig-datum-h" style="font-size:13px"></div>
+          <div class="fg"><label>Plaats</label><input type="text" id="sig-plaats-h" value="Zwolle" placeholder="Plaats" style="font-size:13px"></div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Door te ondertekenen bevestigt u bovenstaande gegevens en akkoord met de algemene voorwaarden.</p>
+      <p style="font-size:11px;color:var(--muted)">&#8594; Na verzending ontvangt <strong>alleen de verhuurder</strong> deze aanvraag. Bij ophalen vindt de definitieve ondertekening door beide partijen plaats.</p>
+    </div>
+  </div>
+  <div class="submit-wrap" style="margin-bottom:14px">
+    <button class="btn-submit f1" id="btn-f1" onclick="submitF1()">&#128231; Verstuur reserveringsaanvraag naar verhuurder</button>
+    <p class="submit-note">Alleen de verhuurder ontvangt deze aanvraag.<br>De definitieve overeenkomst + beider handtekeningen worden pas bij ophalen verstuurd naar beide partijen.</p>
+  </div>
+  <div id="success-f1" class="success">
+    <div style="font-size:40px;margin-bottom:10px">&#128231;</div>
+    <h2>Aanvraag verstuurd!</h2>
+    <p>De verhuurder ontvangt uw aanvraag en neemt contact op ter bevestiging.<br><br>
+    <strong>Wat nu?</strong> U ontvangt bij ophalen de definitieve huurovereenkomst, die door beide partijen ondertekend wordt en daarna naar u beiden verstuurd wordt.</p>
+  </div>
+  <div class="btn-row"><button class="btn-back" onclick="goP('1-3')">&#8592; Terug</button><div></div></div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- FASE 2                                     -->
+<!-- ══════════════════════════════════════════ -->
+
+<!-- F2 STAP 1: HUURDER RECAP + TRAILER -->
+<div class="page" id="p-2-1">
+  <div class="fase-badge f2-badge">&#128269; Fase 2 / Stap 1 van 3 &#8212; Bevestiging gegevens bij ophalen</div>
+  <div class="section">
+    <div class="sh"><span>&#128203;</span><h2>Bevestiging huurgegevens</h2></div>
+    <div class="sb">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Controleer samen met de huurder of onderstaande gegevens kloppen. Pas aan indien nodig.</p>
+      <div class="r2">
+        <div class="fg"><label>Naam huurder</label><input type="text" id="f2-naam" placeholder="Volledige naam huurder"></div>
+        <div class="fg"><label>E-mailadres huurder <span class="req">*</span></label><input type="email" id="f2-email" placeholder="Email huurder"><div class="hint">Definitieve overeenkomst gaat hierheen</div></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>Trailer</label><input type="text" id="f2-trailer" placeholder="Trailer 1 of 2" readonly style="background:#f9f9f9"></div>
+        <div class="fg"><label>VIN-nummer</label><input type="text" id="f2-vin" placeholder="VIN" readonly style="background:#f9f9f9"></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>Ophalen</label><input type="text" id="f2-van" readonly style="background:#f9f9f9"></div>
+        <div class="fg"><label>Retour</label><input type="text" id="f2-tot" readonly style="background:#f9f9f9"></div>
+      </div>
+      <div id="prijs-box-f2" class="price-box" style="display:none">
+        <h3>&#128176; Definitief kostenoverzicht</h3>
+        <div class="price-row"><span>Huurperiode</span><span id="f2-pc-uren">&#8212;</span></div>
+        <div class="price-row"><span>Tarief</span><span id="f2-pc-tarief">&#8212;</span></div>
+        <div class="price-row total"><span>Huursom</span><span id="f2-pc-prijs">&#8212;</span></div>
+        <div class="price-row"><span>Borg (contant)</span><span id="f2-pc-borg">&#8212;</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row"><div></div><button class="btn-next" onclick="next(2,1)">Volgende &#8594;</button></div>
+</div>
+
+<!-- F2 STAP 2: INSPECTIE TRAILER -->
+<div class="page" id="p-2-2">
+  <div class="fase-badge f2-badge">&#128269; Fase 2 / Stap 2 van 3 &#8212; Inspectie trailer bij ophalen</div>
+  <div class="section">
+    <div class="sh"><span>&#128269;</span><h2>Staat van de trailer bij ophalen</h2></div>
+    <div class="sb">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Loop samen met de huurder de trailer na en registreer de staat. Dit beschermt beide partijen.</p>
+
+      <div class="fg"><label>Verlichting getest &amp; werkend? <span class="req">*</span></label>
+        <select id="f2-verlichting"><option value="">Selecteer...</option><option value="Ja - werkend en getest">Ja &#8212; werkend en getest</option><option value="Nee - defect">Nee &#8212; defect (omschrijf bij opmerkingen)</option></select>
+      </div>
+
+      <div class="fg"><label>Staat per onderdeel <span class="req">*</span></label>
+        <div class="staat-grid">
+          <div class="staat-row"><div class="staat-lbl">Algemeen</div><div class="staat-btns"><button class="sbtn g" onclick="setSt('alg','Goed',this)">Goed</button><button class="sbtn m" onclick="setSt('alg','Matig',this)">Matig</button><button class="sbtn s" onclick="setSt('alg','Slecht',this)">Slecht</button></div></div>
+          <div class="staat-row"><div class="staat-lbl">Banden</div><div class="staat-btns"><button class="sbtn g" onclick="setSt('ban','Goed',this)">Goed</button><button class="sbtn m" onclick="setSt('ban','Matig',this)">Matig</button><button class="sbtn s" onclick="setSt('ban','Slecht',this)">Slecht</button></div></div>
+          <div class="staat-row"><div class="staat-lbl">Verlichting</div><div class="staat-btns"><button class="sbtn g" onclick="setSt('vlt','Goed',this)">Goed</button><button class="sbtn m" onclick="setSt('vlt','Matig',this)">Matig</button><button class="sbtn s" onclick="setSt('vlt','Slecht',this)">Slecht</button></div></div>
+          <div class="staat-row"><div class="staat-lbl">Koppeling</div><div class="staat-btns"><button class="sbtn g" onclick="setSt('kop','Goed',this)">Goed</button><button class="sbtn m" onclick="setSt('kop','Matig',this)">Matig</button><button class="sbtn s" onclick="setSt('kop','Slecht',this)">Slecht</button></div></div>
+          <div class="staat-row"><div class="staat-lbl">Accessoires</div><div class="staat-btns"><button class="sbtn g" onclick="setSt('acc','Goed',this)">Goed</button><button class="sbtn m" onclick="setSt('acc','Matig',this)">Matig</button><button class="sbtn s" onclick="setSt('acc','Slecht',this)">Slecht</button></div></div>
+        </div>
+      </div>
+
+      <!-- TOP-DOWN TRAILER TEKENING -->
+      <div class="fg" style="margin-top:4px">
+        <label>Schade markeren &#8212; bovenaanzicht aanhanger (klik op de tekening)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px">
+          <div>
+            <div class="canvas-wrap">
+              <canvas id="schade-canvas" width="300" height="380"></canvas>
+              <div class="canvas-toolbar">
+                <button class="ctbtn" onclick="undoP()">&#8592; Ongedaan</button>
+                <button class="ctbtn red" onclick="clearP()">&#10005; Wissen</button>
+                <span style="font-size:10px;color:var(--muted);align-self:center;margin-left:auto">Klik = schade</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="schade-list">
+              <h4>Schademeldingen</h4>
+              <div id="si-list"></div>
+              <button class="add-si" onclick="addSi()">&#43; Omschrijving toevoegen</button>
+            </div>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:4px">Geen schade? Laat de tekening leeg. Nummers op tekening corresponderen met beschrijvingen.</div>
+      </div>
+
+      <!-- ACCESSOIRES -->
+      <div class="fg" style="margin-top:4px">
+        <label>Accessoires aanwezig bij ophalen (vink aan wat aanwezig is)</label>
+        <div class="acc-grid" id="acc-grid"></div>
+      </div>
+
+      <div class="fg"><label>Opmerkingen inspectie</label><textarea id="f2-opmerking" placeholder="Bijzonderheden, opmerkingen over staat..."></textarea></div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn-back" onclick="goP('2-1')">&#8592; Terug</button><button class="btn-next" onclick="next(2,2)">Naar handtekeningen &#8594;</button></div>
+</div>
+
+<!-- F2 STAP 3: BEIDE HANDTEKENINGEN -->
+<div class="page" id="p-2-3">
+  <div class="fase-badge f2-badge">&#128269; Fase 2 / Stap 3 van 3 &#8212; Definitieve ondertekening</div>
+  <div class="section">
+    <div class="sh"><span>&#9997;&#65039;</span><h2>Definitieve ondertekening beide partijen</h2></div>
+    <div class="sb">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Beide partijen geven hierbij akkoord op de huurovereenkomst inclusief de geregistreerde staat van de trailer.</p>
+
+      <div class="r2" style="gap:16px">
+        <div>
+          <div class="sig-label">Handtekening huurder <span class="req">*</span></div>
+          <div class="sig-wrap"><canvas id="sig-h2" width="280" height="140"></canvas>
+          <div class="sig-bar"><span id="sig-naam-h2">Naam huurder</span><button class="sig-clear" onclick="clearSig('h2')">Wissen</button></div></div>
+          <div id="f2-naam-show" class="sig-name" style="margin-top:4px"></div>
+        </div>
+        <div>
+          <div class="sig-label">Handtekening verhuurder <span class="req">*</span></div>
+          <div class="sig-wrap"><canvas id="sig-v" width="280" height="140"></canvas>
+          <div class="sig-bar"><span>Jacco Peterson</span><button class="sig-clear" onclick="clearSig('v')">Wissen</button></div></div>
+          <div class="sig-name" style="margin-top:4px">Jacco Peterson &#8212; MotorTrailer Zwolle</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+            <div class="fg"><label>Datum</label><input type="date" id="sig-datum-v" style="font-size:12px"></div>
+            <div class="fg"><label>Plaats</label><input type="text" id="sig-plaats-v" value="Zwolle" placeholder="Plaats" style="font-size:12px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="akk-box" style="margin-top:14px">
+        <p><strong>Definitieve akkoordverklaring bij ophalen:</strong></p>
+        <div class="ck-row"><input type="checkbox" id="f2-a1"><label for="f2-a1">Beide partijen bevestigen de staat van de trailer zoals geregistreerd in fase 2.</label></div>
+        <div class="ck-row"><input type="checkbox" id="f2-a2"><label for="f2-a2">Huurder heeft de trailer in goede staat ontvangen en bevestigt akkoord met de algemene voorwaarden.</label></div>
+        <div class="ck-row"><input type="checkbox" id="f2-a3"><label for="f2-a3">De borg van &#8364;190,-/&#8364;200,- is contant voldaan aan verhuurder.</label></div>
+      </div>
+    </div>
+  </div>
+  <div class="submit-wrap f2" style="margin-bottom:14px">
+    <button class="btn-submit f2" id="btn-f2" onclick="submitF2()">&#9989; Definitieve overeenkomst versturen naar beide partijen</button>
+    <p class="submit-note">Verhuurder <strong>en</strong> huurder ontvangen de definitieve overeenkomst met handtekeningen.</p>
+  </div>
+  <div id="success-f2" class="success" style="border-color:var(--green)">
+    <div style="font-size:40px;margin-bottom:10px">&#9989;</div>
+    <h2>Definitieve overeenkomst verstuurd!</h2>
+    <p>Beide partijen ontvangen de volledige huurovereenkomst inclusief handtekeningen en staat van de trailer.</p>
+    <div id="retour-btn-wrap" style="display:none;margin-top:16px">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Gebruik deze knop bij het retour brengen van de aanhanger:</p>
+      <a id="retour-link-btn" href="#" target="_blank"
+         style="display:inline-flex;align-items:center;gap:8px;background:#e07b00;color:#fff;
+                font-size:14px;font-weight:bold;padding:12px 24px;border-radius:50px;text-decoration:none">
+        &#128666; Retour name starten
+      </a>
+      <p style="font-size:11px;color:var(--muted);margin-top:6px">Alle gegevens worden automatisch ingevuld</p>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn-back" onclick="goP('2-2')">&#8592; Terug</button><div></div></div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────
+var fase=1, curPage='1-1';
+var st={alg:'',ban:'',vlt:'',kop:'',acc:''};
+var pts=[], schCtx, schCanvas;
+var sigCtxs={};
+var sigDrawing={};
+var ACCESSORIES=['3x wielklem','1x oprijplaat','6x automatische spanbanden','3x ratel spanbanden','1x reservewiel','1x lier','1x neuswiel','2x achtersteunen','2x steunblokjes voor wielen','1x disselslot'];
+var VERHUURDER_EMAIL='jaccopeterson93@gmail.com';
+var VERHUURDER_NAAM='Jacco Peterson';
+var VERHUURDER_ADRES='Luttekestraat 52A, 8011LS Zwolle';
+var T1={dag:35,weekend:70,week:139,borg:190,vin:'Nader te melden',naam:'Trailer 1 - Ongeremd 220x130cm'};
+var T2={dag:45,weekend:89,week:159,borg:200,vin:'WHD421A1050309246',naam:'Trailer 2 - Geremd 300x165cm'};
+
+// ─── INIT ────────────────────────────────────────────────────
+window.onload=function(){
+  // Pre-fill today's date in all signature date fields
+  var today=new Date().toISOString().split('T')[0];
+  ['sig-datum-h','sig-datum-h2','sig-datum-v'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.value=today;
+  });
+  prefillFromURL();
+  initAccessoires();
+  initSig('huurder','sig-huurder');
+  initSig('h2','sig-h2');
+  initSig('v','sig-v');
+  renderSteps();
+};
+
+function prefillFromURL(){
+  var p=new URLSearchParams(window.location.search);
+  function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
+  set('voornaam',p.get('voornaam'));set('achternaam',p.get('achternaam'));
+  set('email',p.get('email'));set('telefoon',p.get('telefoon'));
+  set('straat',p.get('straat'));set('postcode',p.get('postcode'));set('woonplaats',p.get('woonplaats'));
+  set('voertuig',p.get('voertuig'));set('kenteken',p.get('kenteken'));
+  set('trailer-keuze',p.get('trailer'));
+  set('datum-van',p.get('van'));set('datum-tot',p.get('tot'));
+  set('tijd-van',p.get('tijd-van')||'14:00');set('tijd-tot',p.get('tijd-tot')||'16:00');
+  if(p.get('voornaam')||p.get('email')||p.get('trailer')||p.get('van')){
+    document.getElementById('prefill-hint').style.display='block';
+  }
+  calcPrijs();
+}
+
+// ─── FASE & PAGE NAV ─────────────────────────────────────────
+function setFase(f){
+  fase=f;
+  document.getElementById('fase-tab-1').classList.toggle('active',f===1);
+  document.getElementById('fase-tab-2').classList.toggle('active',f===2);
+  var p = f===1 ? '1-1' : '2-1';
+  if(f===2){
+    fillFase2FromFase1();
+    initCanvas();
+  }
+  goP(p);
+  renderSteps();
+}
+
+function goP(id){
+  document.querySelectorAll('.page').forEach(function(el){el.classList.remove('active');});
+  var el=document.getElementById('p-'+id);
+  if(el){el.classList.add('active'); curPage=id;}
+  window.scrollTo(0,0);
+  renderSteps();
+  if(id==='1-4') buildSumF1();
+  if(id==='2-3'){
+    document.getElementById('sig-naam-h2').textContent=document.getElementById('f2-naam').value||'Naam huurder';
+    document.getElementById('f2-naam-show').textContent=document.getElementById('f2-naam').value;
+  }
+}
+
+var STEPS_F1=[{id:'1-1',lbl:'Huurder'},{id:'1-2',lbl:'Huurperiode'},{id:'1-3',lbl:'Voorwaarden'},{id:'1-4',lbl:'Handtekening'}];
+var STEPS_F2=[{id:'2-1',lbl:'Bevestiging'},{id:'2-2',lbl:'Inspectie'},{id:'2-3',lbl:'Ondertekening'}];
+
+function renderSteps(){
+  var steps=fase===1?STEPS_F1:STEPS_F2;
+  var bar=document.getElementById('steps-bar');
+  bar.innerHTML='';
+  steps.forEach(function(s,i){
+    var div=document.createElement('div');
+    div.className='sdot'+(curPage===s.id?' active':'');
+    div.innerHTML='<div class="sdot-num">'+(i+1)+'</div><span>'+s.lbl+'</span>';
+    div.onclick=(function(sid){return function(){goP(sid);};})(s.id);
+    bar.appendChild(div);
+  });
+}
+
+function next(f,step){
+  if(!validate(f,step))return;
+  var nexts={};
+  nexts['1-1']='1-2'; nexts['1-2']='1-3'; nexts['1-3']='1-4';
+  nexts['2-1']='2-2'; nexts['2-2']='2-3';
+  var cur=f+'-'+step;
+  if(nexts[cur])goP(nexts[cur]);
+}
+
+// ─── VALIDATION ──────────────────────────────────────────────
+function validate(f,step){
+  var ok=true;
+  function req(id){var el=document.getElementById(id);if(!el||!el.value.trim()){if(el)el.classList.add('err');ok=false;}else if(el)el.classList.remove('err');}
+  if(f===1&&step===1){['voornaam','achternaam','geboortedatum','telefoon','email','straat','postcode','woonplaats','rijbewijs','legitimatie','voertuig','kenteken'].forEach(req);}
+  if(f===1&&step===2){['trailer-keuze','datum-van','tijd-van','datum-tot','tijd-tot'].forEach(req);
+    if(ok){
+      var vdt=new Date(document.getElementById('datum-van').value+'T'+(document.getElementById('tijd-van').value||'14:00'));
+      var tdt=new Date(document.getElementById('datum-tot').value+'T'+(document.getElementById('tijd-tot').value||'16:00'));
+      if(tdt<vdt){alert('Datum retour mag niet eerder zijn dan de ophaal datum');return false;}
+    }
+  }
+  if(f===1&&step===3){for(var i=1;i<=6;i++){if(!document.getElementById('a'+i).checked){alert('Vink alle akkoordpunten aan.');return false;}}}
+  if(f===2&&step===1){['f2-naam','f2-email'].forEach(req);}
+  if(f===2&&step===2){
+    if(!document.getElementById('f2-verlichting').value){alert('Geef aan of de verlichting werkend is.');return false;}
+    if(!st.alg||!st.ban||!st.vlt||!st.kop||!st.acc){alert('Geef de staat aan voor alle onderdelen.');return false;}
+  }
+  if(!ok)alert('Vul alle verplichte velden in.');
+  return ok;
+}
+
+// ─── PRIJS BEREKENING ────────────────────────────────────────
+function calcPrijs(){
+  var tNr=document.getElementById('trailer-keuze').value;
+  var van=document.getElementById('datum-van').value;
+  var tv=document.getElementById('tijd-van').value||'14:00';
+  var tot=document.getElementById('datum-tot').value;
+  var tt=document.getElementById('tijd-tot').value||'16:00';
+  if(!tNr||!van||!tv||!tot||!tt){document.getElementById('prijs-box').style.display='none';return;}
+  var v=new Date(van+'T'+tv);
+  var to=new Date(tot+'T'+tt);
+  if(to<v){
+    alert('Datum retour mag niet eerder zijn dan de ophaal datum');
+    document.getElementById('datum-tot').value='';
+    document.getElementById('prijs-box').style.display='none';
+    return;
+  }
+  var t=tNr==='1'?T1:T2;
+  var uren=Math.round((to-v)/3600000);
+  var vanD=new Date(van); var totD=new Date(tot);
+  var calDagen=Math.round((totD-vanD)/86400000);
+  var zelfdedag=(van===tot);
+  var prijs,tarief,dagRate;
+  if(zelfdedag||uren===0){
+    prijs=t.dag;
+    tarief='Dagtarief (ophalen en retour zelfde datum)';
+  } else if(uren<150){
+    dagRate=tNr==='1'?26.33:29.67;
+    prijs=Math.ceil(calDagen*dagRate);
+    tarief='Weekendtarief: '+calDagen+' kalenderdag(en) x €'+dagRate;
+  } else {
+    dagRate=tNr==='1'?19.90:22.72;
+    prijs=Math.ceil(calDagen*dagRate);
+    tarief='Weektarief: '+calDagen+' kalenderdag(en) x €'+dagRate;
+  }
+  document.getElementById('prijs-box').style.display='block';
+  document.getElementById('pc-uren').textContent=uren+' uur ('+calDagen+' kalenderdag'+(calDagen!==1?'en':'')+')' ;
+  document.getElementById('pc-tarief').textContent=tarief;
+  document.getElementById('pc-van').textContent=van+' '+tv;
+  document.getElementById('pc-tot').textContent=tot+' '+tt;
+  document.getElementById('pc-prijs').textContent='€'+prijs+',-';
+  document.getElementById('pc-borg').textContent='€'+t.borg+',- contant';
+  window._prijs=prijs;window._tarief=tarief;window._uren=uren;window._calDagen=calDagen;window._tNr=tNr;
+}
+
+function getPrijsData(){
+  var tNr=document.getElementById('trailer-keuze').value||window._tNr;
+  var t=tNr==='1'?T1:T2;
+  var van=document.getElementById('datum-van').value,tv=document.getElementById('tijd-van').value||'14:00';
+  var tot=document.getElementById('datum-tot').value,tt=document.getElementById('tijd-tot').value||'16:00';
+  var uren=window._uren||0;
+  var calDagen=window._calDagen||0;
+  return{trailer:t,prijs:window._prijs||0,tarief:window._tarief||'',uren:uren,calDagen:calDagen,van:van+' '+tv,tot:tot+' '+tt};
+}
+
+// ─── FASE 2 INVULLEN VANUIT FASE 1 ──────────────────────────
+function fillFase2FromFase1(){
+  var nm=document.getElementById('voornaam').value+' '+document.getElementById('achternaam').value;
+  var em=document.getElementById('email').value;
+  var tNr=document.getElementById('trailer-keuze').value;
+  var t=tNr==='1'?T1:T2;
+  document.getElementById('f2-naam').value=nm;
+  document.getElementById('f2-email').value=em;
+  document.getElementById('f2-trailer').value=tNr==='1'?T1.naam:T2.naam;
+  document.getElementById('f2-vin').value=t.vin||'Zie huurovereenkomst';
+  document.getElementById('f2-van').value=document.getElementById('datum-van').value+' '+document.getElementById('tijd-van').value;
+  document.getElementById('f2-tot').value=document.getElementById('datum-tot').value+' '+document.getElementById('tijd-tot').value;
+  if(window._prijs){
+    var pb=document.getElementById('prijs-box-f2');
+    pb.style.display='block';
+    document.getElementById('f2-pc-uren').textContent=(window._uren||0)+' uur';
+    document.getElementById('f2-pc-tarief').textContent=window._tarief||'';
+    document.getElementById('f2-pc-prijs').textContent='\u20ac'+(window._prijs||0)+',-';
+    document.getElementById('f2-pc-borg').textContent='\u20ac'+t.borg+',- contant';
+  }
+}
+
+// ─── CANVAS TRAILER BOVENAANZICHT ───────────────────────────
+function initCanvas(){
+  schCanvas=document.getElementById('schade-canvas');
+  if(!schCanvas)return;
+  schCtx=schCanvas.getContext('2d');
+  drawTop(schCtx,schCanvas.width,schCanvas.height,pts);
+  schCtx.restore&&schCtx.restore();
+  schCanvas.onclick=function(e){
+    var r=schCanvas.getBoundingClientRect();
+    var sx=schCanvas.width/r.width, sy=schCanvas.height/r.height;
+    var x=(e.clientX-r.left)*sx, y=(e.clientY-r.top)*sy;
+    pts.push({x:x,y:y});
+    drawTop(schCtx,schCanvas.width,schCanvas.height,pts);
+    addSi();
+  };
+}
+
+function drawTop(c,W,H,pts){
+  c.clearRect(0,0,W,H);
+
+  // Achtergrond
+  c.fillStyle='#f0ede8'; c.fillRect(0,0,W,H);
+
+  // Labels
+  c.fillStyle='#999'; c.font='bold 10px Arial'; c.textAlign='center';
+  c.fillText('VOOR',150,13);
+  c.fillText('ACHTER',150,375);
+  c.fillStyle='#bbb'; c.font='9px Arial';
+  c.fillText('L',10,198); c.fillText('R',290,198);
+
+  // === DISSEL ===
+  c.beginPath();
+  c.moveTo(150,20); c.lineTo(82,68); c.lineTo(218,68); c.closePath();
+  c.fillStyle='#b0a898'; c.fill();
+  c.strokeStyle='#7a7060'; c.lineWidth=1.5; c.stroke();
+  c.strokeStyle='#9a9080'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(150,20); c.lineTo(150,68); c.stroke();
+  c.beginPath(); c.arc(150,21,7,0,Math.PI*2);
+  c.fillStyle='#888'; c.fill();
+  c.strokeStyle='#555'; c.lineWidth=2; c.stroke();
+  c.beginPath(); c.arc(150,21,3,0,Math.PI*2);
+  c.fillStyle='#555'; c.fill();
+
+  // === FRAME ===
+  var fx=28, fy=68, fw=244, fh=272;
+  c.fillStyle='#c8c0b0';
+  c.strokeStyle='#7a7060'; c.lineWidth=3;
+  c.beginPath(); c.rect(fx,fy,fw,fh); c.fill(); c.stroke();
+
+  // === LAADVLOER - egale kleur ===
+  c.fillStyle='#d9c9a9';
+  c.fillRect(fx+6,fy+6,fw-12,fh-12);
+
+  // Zijrails
+  c.fillStyle='#b8a880';
+  c.fillRect(fx+4,fy+6,4,fh-12);
+  c.fillRect(fx+fw-8,fy+6,4,fh-12);
+
+  // Sjorpunten
+  var hookYs=[fy+50,fy+110,fy+175,fy+235];
+  hookYs.forEach(function(hy){
+    c.fillStyle='#8a7a60';
+    c.fillRect(fx+4,hy-4,5,8);
+    c.fillRect(fx+fw-9,hy-4,5,8);
+    c.strokeStyle='#5a4a30'; c.lineWidth=0.8;
+    c.strokeRect(fx+4,hy-4,5,8);
+    c.strokeRect(fx+fw-9,hy-4,5,8);
+  });
+
+  // === 3 MOTORSTEUNEN - naast elkaar, vooraan ===
+  // Elk 62px breed, 2 gaps van 14px = 62*3+14*2 = 214px total
+  // Start: fx + (fw-214)/2 = 28 + 15 = 43
+  var sW=62, sH=28, sGap=14;
+  var sTotalW = 3*sW + 2*sGap;
+  var sStartX = fx + (fw - sTotalW)/2;
+  var sY = fy + 14; // vooraan
+
+  for(var i=0;i<3;i++){
+    var sx = sStartX + i*(sW+sGap);
+
+    // Achterplaat steun
+    c.fillStyle='#7a6c58';
+    c.beginPath(); c.rect(sx,sY,sW,sH); c.fill();
+    c.strokeStyle='#4a3c28'; c.lineWidth=1.2; c.stroke();
+
+    // Rijgoot (wiel past hier in)
+    c.fillStyle='#5a4c38';
+    c.fillRect(sx+12,sY+3,sW-24,sH-6);
+
+    // Voorstopper (verhoogd lipje)
+    c.fillStyle='#c0b098';
+    c.fillRect(sx,sY,sW,6);
+    c.strokeStyle='#8a7a60'; c.lineWidth=0.8;
+    c.strokeRect(sx,sY,sW,6);
+
+    // Bevestigingsboutjes
+    c.fillStyle='#9a8a70';
+    c.beginPath(); c.arc(sx+6,sY+sH/2,3,0,Math.PI*2); c.fill();
+    c.beginPath(); c.arc(sx+sW-6,sY+sH/2,3,0,Math.PI*2); c.fill();
+
+    // Nummerlabel
+    c.fillStyle='rgba(60,40,20,0.65)'; c.font='bold 9px Arial'; c.textAlign='center';
+    c.fillText('M'+(i+1), sx+sW/2, sY+sH+11);
+  }
+
+  // === SPATBORDEN - duidelijk zichtbaar ===
+  var axleY = fy + fh*0.52 + 18;
+
+  // Linker spatbord
+  c.save();
+  // Buitenste halve ovaal (het spatbord zelf)
+  c.beginPath();
+  c.arc(fx, axleY, 20, Math.PI*0.5, Math.PI*1.5, false);
+  c.closePath();
+  c.fillStyle='#6a6055'; c.fill();
+  c.strokeStyle='#3a3028'; c.lineWidth=2; c.stroke();
+  // Binnenrand (uitsparing voor wiel)
+  c.beginPath();
+  c.arc(fx, axleY, 13, Math.PI*0.55, Math.PI*1.45, false);
+  c.closePath();
+  c.fillStyle='#2a2a2a'; c.fill();
+  c.restore();
+
+  // Rechter spatbord
+  c.save();
+  c.beginPath();
+  c.arc(fx+fw, axleY, 20, Math.PI*1.5, Math.PI*0.5, false);
+  c.closePath();
+  c.fillStyle='#6a6055'; c.fill();
+  c.strokeStyle='#3a3028'; c.lineWidth=2; c.stroke();
+  c.beginPath();
+  c.arc(fx+fw, axleY, 13, Math.PI*1.55, Math.PI*0.45, false);
+  c.closePath();
+  c.fillStyle='#2a2a2a'; c.fill();
+  c.restore();
+
+  // === WIELAS + WIELEN ===
+  c.strokeStyle='#444'; c.lineWidth=3;
+  c.beginPath(); c.moveTo(fx-20,axleY); c.lineTo(fx+fw+20,axleY); c.stroke();
+  // Links
+  c.fillStyle='#1e1e1e';
+  c.beginPath(); c.ellipse(fx-2,axleY,12,26,0,0,Math.PI*2); c.fill();
+  c.fillStyle='#555';
+  c.beginPath(); c.ellipse(fx-2,axleY,5,12,0,0,Math.PI*2); c.fill();
+  // Rechts
+  c.fillStyle='#1e1e1e';
+  c.beginPath(); c.ellipse(fx+fw+2,axleY,12,26,0,0,Math.PI*2); c.fill();
+  c.fillStyle='#555';
+  c.beginPath(); c.ellipse(fx+fw+2,axleY,5,12,0,0,Math.PI*2); c.fill();
+
+  // === ACHTERBUMPER + VERLICHTING ===
+  c.fillStyle='#888';
+  c.fillRect(fx,fy+fh,fw,6);
+  c.fillStyle='#e53030'; c.fillRect(fx,fy+fh,18,10);
+  c.fillStyle='#e53030'; c.fillRect(fx+fw-18,fy+fh,18,10);
+  c.fillStyle='#f0a000'; c.fillRect(fx+18,fy+fh,14,10);
+  c.fillStyle='#f0a000'; c.fillRect(fx+fw-32,fy+fh,14,10);
+  c.fillStyle='#eee'; c.fillRect(fx+fw/2-8,fy+fh,16,10);
+
+  // === SCHADE PUNTEN ===
+  pts.forEach(function(p,i){
+    c.beginPath(); c.arc(p.x,p.y,11,0,Math.PI*2);
+    c.fillStyle='rgba(192,57,43,0.2)'; c.fill();
+    c.strokeStyle='#c0392b'; c.lineWidth=2.5; c.stroke();
+    c.fillStyle='#c0392b'; c.font='bold 11px Arial'; c.textAlign='center';
+    c.fillText((i+1).toString(),p.x,p.y+4);
+  });
+}
+function drawTop_OLD(){
+  if(!schCtx)return;
+  var c=schCtx, W=300, H=380;
+  c.clearRect(0,0,W,H);
+
+  // Achtergrond
+  c.fillStyle='#f0ede8'; c.fillRect(0,0,W,H);
+
+  // Kompasletters
+  c.fillStyle='#999'; c.font='bold 10px Arial'; c.textAlign='center';
+  c.fillText('VOOR',150,14);
+  c.fillText('ACHTER',150,375);
+  c.fillStyle='#bbb'; c.font='9px Arial';
+  c.fillText('L',10,198); c.fillText('R',290,198);
+
+  // === DISSEL (bovenaanzicht: A-vorm) ===
+  c.beginPath();
+  c.moveTo(150,20);
+  c.lineTo(82,68); c.lineTo(218,68); c.closePath();
+  c.fillStyle='#b0a898'; c.fill();
+  c.strokeStyle='#7a7060'; c.lineWidth=1.5; c.stroke();
+  // Dissel middenlijn
+  c.strokeStyle='#9a9080'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(150,20); c.lineTo(150,68); c.stroke();
+  // Koppeloog
+  c.beginPath(); c.arc(150,21,7,0,Math.PI*2);
+  c.fillStyle='#888'; c.fill();
+  c.strokeStyle='#555'; c.lineWidth=2; c.stroke();
+  c.beginPath(); c.arc(150,21,3,0,Math.PI*2);
+  c.fillStyle='#555'; c.fill();
+
+  // === TRAILER FRAME ===
+  var fx=28,fy=68,fw=244,fh=272;
+  // Buitenframe
+  c.fillStyle='#c8c0b0';
+  c.strokeStyle='#7a7060'; c.lineWidth=3;
+  c.beginPath(); c.rect(fx,fy,fw,fh); c.fill(); c.stroke();
+
+  // Laadvloer (houten planken effect)
+  c.fillStyle='#d8c8a8';
+  c.fillRect(fx+8,fy+8,fw-16,fh-16);
+  c.strokeStyle='#b8a880'; c.lineWidth=0.6;
+  for(var i=0;i<11;i++){
+    var ly=fy+8+(i*23);
+    c.beginPath(); c.moveTo(fx+8,ly); c.lineTo(fx+fw-8,ly); c.stroke();
+  }
+  // Diagonale nerf
+  c.strokeStyle='rgba(180,160,100,0.25)'; c.lineWidth=0.4;
+  for(var j=0;j<6;j++){
+    var bx=fx+8+(j*42);
+    c.beginPath(); c.moveTo(bx,fy+8); c.lineTo(bx+20,fy+fh-8); c.stroke();
+  }
+
+  // === SPATBORDEN (bovenaanzicht - D-vormen over de wielen) ===
+  var axleY = fy + fh*0.52 + 18; // wielas hoogte
+  // Links spatbord
+  c.save();
+  c.beginPath();
+  c.ellipse(fx-2, axleY, 13, 30, 0, -Math.PI/2, Math.PI/2);
+  c.lineTo(fx+10, axleY-30);
+  c.closePath();
+  c.fillStyle='#a09080'; c.fill();
+  c.strokeStyle='#7a7060'; c.lineWidth=1.5; c.stroke();
+  c.restore();
+  // Rechts spatbord
+  c.save();
+  c.beginPath();
+  c.ellipse(fx+fw+2, axleY, 13, 30, 0, Math.PI/2, -Math.PI/2);
+  c.lineTo(fx+fw-10, axleY-30);
+  c.closePath();
+  c.fillStyle='#a09080'; c.fill();
+  c.strokeStyle='#7a7060'; c.lineWidth=1.5; c.stroke();
+  c.restore();
+
+  // === WIELEN (zichtbaar aan de buitenzijde) ===
+  // Links
+  c.fillStyle='#2a2a2a';
+  c.beginPath(); c.ellipse(fx-1,axleY,11,24,0,0,Math.PI*2); c.fill();
+  c.fillStyle='#555';
+  c.beginPath(); c.ellipse(fx-1,axleY,5,13,0,0,Math.PI*2); c.fill();
+  // Rechts
+  c.fillStyle='#2a2a2a';
+  c.beginPath(); c.ellipse(fx+fw+1,axleY,11,24,0,0,Math.PI*2); c.fill();
+  c.fillStyle='#555';
+  c.beginPath(); c.ellipse(fx+fw+1,axleY,5,13,0,0,Math.PI*2); c.fill();
+
+  // Wielas (lijn)
+  c.strokeStyle='#555'; c.lineWidth=2.5;
+  c.beginPath(); c.moveTo(fx-12,axleY); c.lineTo(fx+fw+12,axleY); c.stroke();
+
+  // === 3 MOTORSTEUNEN (bovenaanzicht) ===
+  // Elke motorssteun = voorwielhouder: U-vormige bak + stop aan de voorkant
+  var mPositions = [fy+28, fy+28+82, fy+28+164]; // 3 posities langs de trailer
+  var mW = 36, mD = 22; // breedte en diepte van de steun
+  var mX = fx + fw/2 - mW/2; // gecentreerd
+
+  mPositions.forEach(function(my, idx){
+    // Bodemplaat van de steun
+    c.fillStyle='#8a7c68';
+    c.beginPath(); c.rect(mX, my, mW, mD);
+    c.fill();
+    c.strokeStyle='#5a5040'; c.lineWidth=1.2; c.stroke();
+
+    // Rijgoot (verdieping voor het wiel) - middendeel donkerder
+    c.fillStyle='#6a5c48';
+    c.fillRect(mX+10, my+2, mW-20, mD-4);
+
+    // Stopper aan het begin (voor)
+    c.fillStyle='#b0a090';
+    c.fillRect(mX, my, mW, 5);
+    c.strokeStyle='#7a6c58'; c.lineWidth=1;
+    c.strokeRect(mX, my, mW, 5);
+
+    // Bevestigingsogen (2 stuks)
+    c.fillStyle='#7a7060';
+    c.beginPath(); c.arc(mX+5, my+mD/2, 3, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.arc(mX+mW-5, my+mD/2, 3, 0, Math.PI*2); c.fill();
+
+    // Label
+    c.fillStyle='rgba(80,60,40,0.7)'; c.font='8px Arial'; c.textAlign='center';
+    c.fillText('steun '+(idx+1), mX+mW/2, my+mD+10);
+  });
+
+  // === ZIJRAILS (voor sjorpunten) ===
+  c.strokeStyle='#9a8a70'; c.lineWidth=2;
+  // Links
+  c.beginPath(); c.moveTo(fx+5,fy+8); c.lineTo(fx+5,fy+fh-8); c.stroke();
+  // Rechts
+  c.beginPath(); c.moveTo(fx+fw-5,fy+8); c.lineTo(fx+fw-5,fy+fh-8); c.stroke();
+  // Sjorpunten (kleine haakjes)
+  var hookY=[fy+20,fy+75,fy+140,fy+205,fy+255];
+  hookY.forEach(function(hy){
+    c.fillStyle='#8a7a60';
+    c.beginPath(); c.rect(fx+2,hy-4,6,8); c.fill();
+    c.strokeStyle='#6a5a40'; c.lineWidth=0.8; c.stroke();
+    c.beginPath(); c.rect(fx+fw-8,hy-4,6,8); c.fill();
+    c.strokeStyle='#6a5a40'; c.lineWidth=0.8; c.stroke();
+  });
+
+  // === ACHTERBUMPER + VERLICHTING ===
+  c.fillStyle='#888';
+  c.fillRect(fx,fy+fh,fw,7);
+  // Achterlichten
+  c.fillStyle='#e53030'; c.fillRect(fx,fy+fh,18,10);
+  c.fillStyle='#e53030'; c.fillRect(fx+fw-18,fy+fh,18,10);
+  c.fillStyle='#f0a000'; c.fillRect(fx+18,fy+fh,14,10);
+  c.fillStyle='#f0a000'; c.fillRect(fx+fw-32,fy+fh,14,10);
+  c.fillStyle='#eee'; c.fillRect(fx+fw/2-8,fy+fh,16,10); // achteruitrijlicht
+
+  // === SCHADE PUNTEN ===
+  pts.forEach(function(p,i){
+    c.save();
+    c.beginPath(); c.arc(p.x,p.y,11,0,Math.PI*2);
+    c.fillStyle='rgba(192,57,43,0.2)'; c.fill();
+    c.strokeStyle='#c0392b'; c.lineWidth=2.5; c.stroke();
+    c.fillStyle='#c0392b'; c.font='bold 11px Arial'; c.textAlign='center';
+    c.fillText((i+1).toString(),p.x,p.y+4);
+    c.restore();
+  });
+}
+function drawTop_OLD(){
+  if(!schCtx)return;
+  var c=schCtx, W=300, H=380;
+  c.clearRect(0,0,W,H);
+
+  // ── Achtergrond ──
+  c.fillStyle='#f5f5f5'; c.fillRect(0,0,W,H);
+
+  // ── Labels ──
+  c.fillStyle='#bbb'; c.font='bold 11px Arial'; c.textAlign='center';
+  c.fillText('VOOR (dissel)',150,18);
+  c.fillText('ACHTER',150,370);
+  c.fillText('L',12,195); c.fillText('R',288,195);
+
+  // ── Dissel (driehoekig bovenaanzicht) ──
+  c.beginPath();
+  c.moveTo(150,22);   // punt dissel
+  c.lineTo(90,70);    // linker aanhechting
+  c.lineTo(210,70);   // rechter aanhechting
+  c.closePath();
+  c.fillStyle='#ccc'; c.fill();
+  c.strokeStyle='#888'; c.lineWidth=1.5; c.stroke();
+
+  // ── Koppeloog ──
+  c.beginPath(); c.arc(150,24,6,0,Math.PI*2);
+  c.fillStyle='#999'; c.fill();
+  c.strokeStyle='#777'; c.lineWidth=1.5; c.stroke();
+
+  // ── Trailer frame / laadvloer ──
+  var fx=30,fy=70,fw=240,fh=270;
+  // Buitenkant frame
+  c.fillStyle='#ddd';
+  c.strokeStyle='#888'; c.lineWidth=2;
+  c.beginPath(); c.rect(fx,fy,fw,fh);
+  c.fill(); c.stroke();
+
+  // Laadvloer (binnenste planken effect)
+  c.strokeStyle='#c0b090'; c.lineWidth=0.8;
+  for(var i=0;i<12;i++){
+    var ly=fy+10+(i*21);
+    c.beginPath(); c.moveTo(fx+10,ly); c.lineTo(fx+fw-10,ly); c.stroke();
+  }
+
+  // Rijgoten (2 sporen voor wielen motor)
+  c.fillStyle='rgba(100,80,50,0.18)';
+  c.fillRect(fx+50,fy+10,20,fh-20);
+  c.fillRect(fx+fw-70,fy+10,20,fh-20);
+  c.strokeStyle='#a0806060'; c.lineWidth=1;
+  c.strokeRect(fx+50,fy+10,20,fh-20);
+  c.strokeRect(fx+fw-70,fy+10,20,fh-20);
+
+  // Rand / bumper achter
+  c.fillStyle='#aaa';
+  c.fillRect(fx,fy+fh-8,fw,8);
+  c.strokeStyle='#888'; c.lineWidth=1.5;
+  c.strokeRect(fx,fy+fh-8,fw,8);
+
+  // Achterlichten
+  c.fillStyle='#e53';
+  c.fillRect(fx,fy+fh,16,12);
+  c.fillRect(fx+fw-16,fy+fh,16,12);
+  c.fillStyle='#fa0';
+  c.fillRect(fx+16,fy+fh,14,12);
+  c.fillRect(fx+fw-30,fy+fh,14,12);
+
+  // Wielas + wielen
+  c.strokeStyle='#555'; c.lineWidth=3;
+  c.beginPath(); c.moveTo(fx,fy+fh/2+20); c.lineTo(fx+fw,fy+fh/2+20); c.stroke();
+  // Wielen links
+  c.fillStyle='#333';
+  c.beginPath(); c.ellipse(fx+10,fy+fh/2+20,10,22,0,0,Math.PI*2); c.fill();
+  c.fillStyle='#666'; c.beginPath(); c.ellipse(fx+10,fy+fh/2+20,5,12,0,0,Math.PI*2); c.fill();
+  // Wielen rechts
+  c.fillStyle='#333';
+  c.beginPath(); c.ellipse(fx+fw-10,fy+fh/2+20,10,22,0,0,Math.PI*2); c.fill();
+  c.fillStyle='#666'; c.beginPath(); c.ellipse(fx+fw-10,fy+fh/2+20,5,12,0,0,Math.PI*2); c.fill();
+
+  // Markeer-labels
+  c.fillStyle='rgba(0,0,0,0.25)'; c.font='9px Arial'; c.textAlign='center';
+  c.fillText('rijgoot',fx+60,fy+fh/2+5);
+  c.fillText('rijgoot',fx+fw-60,fy+fh/2+5);
+
+  // Schade punten
+  pts.forEach(function(p,i){
+    c.beginPath(); c.arc(p.x,p.y,10,0,Math.PI*2);
+    c.fillStyle='rgba(192,57,43,0.22)'; c.fill();
+    c.strokeStyle='#c0392b'; c.lineWidth=2; c.stroke();
+    c.fillStyle='#c0392b'; c.font='bold 11px Arial'; c.textAlign='center';
+    c.fillText((i+1).toString(),p.x,p.y+4);
+  });
+}
+
+function undoP(){pts.pop();drawTop(schCtx,schCanvas.width,schCanvas.height,pts);var lst=document.getElementById('si-list');if(lst.lastChild)lst.removeChild(lst.lastChild);}
+function clearP(){pts=[];drawTop(schCtx,schCanvas.width,schCanvas.height,pts);document.getElementById('si-list').innerHTML='';}
+
+function addSi(){
+  var n=pts.length;
+  var div=document.createElement('div'); div.className='si';
+  div.innerHTML='<span class="si-num">'+n+'</span><input type="text" placeholder="Omschrijf schade '+n+'..."><button onclick="this.parentElement.remove()">&#10005;</button>';
+  document.getElementById('si-list').appendChild(div);
+}
+
+function getSiTxt(){
+  var items=document.querySelectorAll('#si-list .si input');
+  var out=[];
+  items.forEach(function(inp,i){if(inp.value.trim())out.push((i+1)+'. '+inp.value.trim());});
+  return out.length?out.join(' | '):'Geen schade gemeld bij ophalen';
+}
+
+// ─── STAAT BUTTONS ───────────────────────────────────────────
+function setSt(key,val,el){
+  st[key]=val;
+  var btns=el.parentElement.querySelectorAll('.sbtn');
+  btns.forEach(function(b){b.classList.remove('sel');});
+  el.classList.add('sel');
+}
+
+// ─── SIGNATURE ───────────────────────────────────────────────
+function initSig(key,canvasId){
+  var canvas=document.getElementById(canvasId);
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  sigCtxs[key]=ctx; sigDrawing[key]=false;
+  ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  function getPos(e){
+    var r=canvas.getBoundingClientRect();
+    var sx=canvas.width/r.width, sy=canvas.height/r.height;
+    var src=e.touches?e.touches[0]:e;
+    return{x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy};
+  }
+  canvas.addEventListener('mousedown',function(e){sigDrawing[key]=true;var p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();});
+  canvas.addEventListener('mousemove',function(e){if(!sigDrawing[key])return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();});
+  canvas.addEventListener('mouseup',function(){sigDrawing[key]=false;});
+  canvas.addEventListener('mouseleave',function(){sigDrawing[key]=false;});
+  canvas.addEventListener('touchstart',function(e){sigDrawing[key]=true;var p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();},{passive:false});
+  canvas.addEventListener('touchmove',function(e){if(!sigDrawing[key])return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();},{passive:false});
+  canvas.addEventListener('touchend',function(){sigDrawing[key]=false;});
+}
+
+function clearSig(key){
+  var ids={huurder:'sig-huurder',h2:'sig-h2',v:'sig-v'};
+  var canvas=document.getElementById(ids[key]);
+  if(canvas)sigCtxs[key].clearRect(0,0,canvas.width,canvas.height);
+}
+
+function isSigEmpty(canvasId){
+  var canvas=document.getElementById(canvasId);
+  if(!canvas)return true;
+  var d=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+  for(var i=3;i<d.length;i+=4){if(d[i]>10)return false;}
+  return true;
+}
+
+// ─── ACCESSOIRES INIT ────────────────────────────────────────
+function initAccessoires(){
+  var g=document.getElementById('acc-grid');
+  if(!g)return;
+  g.innerHTML='';
+  ACCESSORIES.forEach(function(acc,i){
+    var div=document.createElement('div'); div.className='acc-item';
+    div.innerHTML='<input type="checkbox" id="acc'+i+'" checked><label for="acc'+i+'">'+acc+'</label>';
+    g.appendChild(div);
+  });
+}
+
+function getAccTxt(){
+  return ACCESSORIES.filter(function(_,i){var el=document.getElementById('acc'+i);return el&&el.checked;}).join(', ');
+}
+
+// ─── SAMENVATTING FASE 1 ─────────────────────────────────────
+function buildSumF1(){
+  var pd=getPrijsData();
+  var nm=document.getElementById('voornaam').value+' '+document.getElementById('achternaam').value;
+  var tNr=document.getElementById('trailer-keuze').value;
+  var t=tNr==='1'?T1:T2;
+  var html='<div class="sum-box">';
+  var rows=[['Huurder',nm],['E-mail',document.getElementById('email').value],['Telefoon',document.getElementById('telefoon').value],['Trailer',t.naam],['VIN',t.vin||'Zie overeenkomst'],['Ophalen',pd.van],['Retour',pd.tot],['Huurperiode',pd.uren+' uur'],['Tarief',pd.tarief],['Huursom','\u20ac'+pd.prijs+',-'],['Borg','\u20ac'+t.borg+',- contant']];
+  rows.forEach(function(r){html+='<div class="sum-row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';});
+  html+='</div>';
+  document.getElementById('sum-f1').innerHTML=html;
+  document.getElementById('sig-naam-h').textContent=nm;
+  document.getElementById('sig-naam-h2').textContent=nm;
+}
+
+// ─── SUBMIT FASE 1 ───────────────────────────────────────────
+function submitF1(){
+  if(isSigEmpty('sig-huurder')){alert('Zet uw handtekening om door te gaan.');return;}
+  var btn=document.getElementById('btn-f1');
+  btn.disabled=true; btn.textContent='Versturen...';
+  var nm=document.getElementById('voornaam').value+' '+document.getElementById('achternaam').value;
+  var em=document.getElementById('email').value;
+  var tNr=document.getElementById('trailer-keuze').value;
+  var t=tNr==='1'?T1:T2;
+  var pd=getPrijsData();
+  var datum=new Date().toLocaleDateString('nl-NL');
+  var data={
+    _subject:'Reserveringsaanvraag Motortrailer - '+nm+' - '+document.getElementById('datum-van').value,
+    _replyto:em,
+    Fase:'Fase 1 - Reserveringsaanvraag',
+    email:em,
+    Naam:nm,
+    Email:em,
+    Geboortedatum:document.getElementById('geboortedatum').value,
+    Telefoon:document.getElementById('telefoon').value,
+    Adres:document.getElementById('straat').value+', '+document.getElementById('postcode').value+' '+document.getElementById('woonplaats').value,
+    Rijbewijsnummer:document.getElementById('rijbewijs').value,
+    Legitimatie:document.getElementById('legitimatie').value,
+    Voertuig:document.getElementById('voertuig').value,
+    Kenteken:document.getElementById('kenteken').value,
+    Bestemming:document.getElementById('bestemming').value||'Niet opgegeven',
+    Trailer:t.naam,
+    VIN:t.vin||'Zie overeenkomst',
+    Ophalen:pd.van,
+    Retour:pd.tot,
+    Huurperiode:pd.uren+' uur ('+pd.calDagen+' kalenderdagen)',
+    Tarief:pd.tarief,
+    Huursom:'\u20ac'+pd.prijs+',-',
+    Borg:'\u20ac'+t.borg+',- contant bij ophalen',
+    Opmerkingen:document.getElementById('opmerkingen').value||'Geen',
+    Datum_ondertekening:document.getElementById('sig-datum-h').value||datum,
+    Plaats_ondertekening:document.getElementById('sig-plaats-h').value||'Zwolle',
+    Akkoord:'Ja - algemene voorwaarden geaccepteerd op '+datum,
+    Handtekening:'Digitaal via motortrailerzwolle.nl'
+  };
+  fetch('https://formspree.io/f/xlgzaqzy',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify(data)
+  }).then(function(r){return r.json();})
+  .then(function(res){
+    if(res.ok){
+      btn.style.display='none';
+      document.getElementById('success-f1').style.display='block';
+    } else {
+      btn.disabled=false;
+      btn.innerHTML='&#128231; Verstuur reserveringsaanvraag naar verhuurder';
+      var errMsg=res.error||res.errors||JSON.stringify(res);
+      alert('Formspree fout: '+errMsg);
+      console.error('Formspree response:', res);
+    }
+  }).catch(function(err){
+    btn.disabled=false;
+    btn.innerHTML='&#128231; Verstuur reserveringsaanvraag naar verhuurder';
+    alert('Verbindingsfout: '+err.message);
+    console.error('Fetch error:', err);
+  });
+}
+
+function submitF2(){
+  if(isSigEmpty('sig-h2')){alert('Huurder heeft nog niet getekend.');return;}
+  if(isSigEmpty('sig-v')){alert('Verhuurder heeft nog niet getekend.');return;}
+  if(!document.getElementById('f2-a1').checked||!document.getElementById('f2-a2').checked||!document.getElementById('f2-a3').checked){
+    alert('Vink alle akkoordpunten aan.');return;
+  }
+  var btn=document.getElementById('btn-f2');
+  btn.disabled=true; btn.textContent='Versturen...';
+  var nm=document.getElementById('f2-naam').value;
+  var em=document.getElementById('f2-email').value;
+  var tNr=window._tNr||document.getElementById('trailer-keuze').value;
+  var t=tNr==='1'?T1:T2;
+  var pd=getPrijsData();
+  var datum=new Date().toLocaleDateString('nl-NL');
+  // Bouw retour URL
+  var rp='?naam='+encodeURIComponent(nm);
+  rp+='&email='+encodeURIComponent(em);
+  rp+='&telefoon='+encodeURIComponent(document.getElementById('telefoon').value);
+  rp+='&adres='+encodeURIComponent(document.getElementById('straat').value+', '+document.getElementById('postcode').value+' '+document.getElementById('woonplaats').value);
+  rp+='&voertuig='+encodeURIComponent(document.getElementById('voertuig').value);
+  rp+='&kenteken='+encodeURIComponent(document.getElementById('kenteken').value);
+  rp+='&trailer='+encodeURIComponent(t.naam);
+  rp+='&vin='+encodeURIComponent(t.vin||'?');
+  rp+='&ophalen='+encodeURIComponent(pd.van);
+  rp+='&retour_gepland='+encodeURIComponent(pd.tot);
+  rp+='&huursom='+encodeURIComponent('\u20ac'+pd.prijs+',-');
+  rp+='&borg='+encodeURIComponent('\u20ac'+t.borg+',-');
+  rp+='&staat_alg='+encodeURIComponent(st.alg);
+  rp+='&staat_ban='+encodeURIComponent(st.ban);
+  rp+='&staat_vlt='+encodeURIComponent(st.vlt);
+  rp+='&staat_kop='+encodeURIComponent(st.kop);
+  rp+='&staat_acc='+encodeURIComponent(st.acc);
+  rp+='&schade_ophalen='+encodeURIComponent(getSiTxt());
+  rp+='&geboortedatum='+encodeURIComponent(document.getElementById('geboortedatum').value);
+  rp+='&rijbewijs='+encodeURIComponent(document.getElementById('rijbewijs').value);
+  rp+='&legitimatie='+encodeURIComponent(document.getElementById('legitimatie').value);
+  rp+='&acc='+encodeURIComponent(getAccTxt());
+  var retourLink='https://motortrailerzwolle.nl/retour-formulier.html'+rp;
+  var data={
+    _subject:'DEFINITIEVE Huurovereenkomst - '+nm+' - '+document.getElementById('datum-van').value,
+    _replyto:VERHUURDER_EMAIL,
+    _cc:em,
+    Fase:'Fase 2 - Definitieve overeenkomst',
+    email:em,
+    Huurder_email:em,
+    Huurder_naam:nm,
+    Geboortedatum:document.getElementById('geboortedatum').value,
+    Telefoon:document.getElementById('telefoon').value,
+    Adres:document.getElementById('straat').value+', '+document.getElementById('postcode').value+' '+document.getElementById('woonplaats').value,
+    Rijbewijsnummer:document.getElementById('rijbewijs').value,
+    Legitimatie:document.getElementById('legitimatie').value,
+    Voertuig:document.getElementById('voertuig').value,
+    Kenteken:document.getElementById('kenteken').value,
+    Bestemming:document.getElementById('bestemming').value||'Niet opgegeven',
+    Trailer:t.naam,
+    VIN:t.vin||'Zie overeenkomst',
+    Accessoires_meegegeven:getAccTxt(),
+    Ophalen:pd.van,
+    Retour_gepland:pd.tot,
+    Huurperiode:pd.uren+' uur ('+pd.calDagen+' kalenderdagen)',
+    Tarief:pd.tarief,
+    Huursom:'\u20ac'+pd.prijs+',-',
+    Borg_voldaan:'\u20ac'+t.borg+',- contant',
+    Staat_verlichting_getest:document.getElementById('f2-verlichting').value,
+    Staat_algemeen:st.alg,
+    Staat_banden:st.ban,
+    Staat_verlichting:st.vlt,
+    Staat_koppeling:st.kop,
+    Staat_accessoires:st.acc,
+    Schade_bij_ophalen:getSiTxt(),
+    Inspectie_opmerkingen:document.getElementById('f2-opmerking').value||'Geen',
+    Handtekening_huurder_datum:document.getElementById('sig-datum-h2').value||datum,
+    Handtekening_huurder_plaats:document.getElementById('sig-plaats-h2').value||'Zwolle',
+    Handtekening_verhuurder_datum:document.getElementById('sig-datum-v').value||datum,
+    Handtekening_verhuurder_plaats:document.getElementById('sig-plaats-v').value||'Zwolle',
+    Handtekening_huurder:'Digitaal via motortrailerzwolle.nl op '+datum,
+    Handtekening_verhuurder:VERHUURDER_NAAM+' - digitaal via motortrailerzwolle.nl op '+datum,
+    Retour_formulier_link:retourLink,
+    Instructie_verhuurder:'Klik op de link hieronder om de retour inspectie te starten (alleen voor verhuurder):'
+  };
+  fetch('https://formspree.io/f/xlgzaqzy',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify(data)
+  }).then(function(r){return r.json();})
+  .then(function(res){
+    if(res.ok){
+      btn.style.display='none';
+      // Toon retour knop in succes scherm
+      var rb=document.getElementById('retour-link-btn');
+      if(rb){rb.href=retourLink;rb.parentElement.style.display='block';}
+      document.getElementById('success-f2').style.display='block';
+    } else {
+      btn.disabled=false;btn.innerHTML='&#9989; Definitieve overeenkomst versturen naar beide partijen';
+      alert('Fout bij verzenden. Probeer opnieuw of bel 06-83 31 82 86.');
+    }
+  }).catch(function(){btn.disabled=false;btn.innerHTML='&#9989; Definitieve overeenkomst versturen naar beide partijen';alert('Verbindingsfout.');});
+}
+</script>
+</body>
+</html>
