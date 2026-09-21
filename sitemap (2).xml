@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://motortrailerzwolle.nl/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <image:image><image:loc>https://motortrailerzwolle.nl/hero-trailer2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://motortrailerzwolle.nl/temared-moto-3-motoraanhanger-aluminium.jpg</image:loc></image:image>
+    <image:image><image:loc>https://motortrailerzwolle.nl/drive-front.jpg</image:loc></image:image>
+    <image:image><image:loc>https://motortrailerzwolle.nl/drive-side.jpg</image:loc></image:image>
+    <image:image><image:loc>https://motortrailerzwolle.nl/drive-rear.jpg</image:loc></image:image>
+  </url>
+</urlset>
